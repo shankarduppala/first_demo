@@ -14,13 +14,13 @@ pipeline {
             }
         }
 
-        stages('Build image') {
+        stage('Build image') {
             steps{
                 sh 'docker build -t $DOCKER-IMAGE:$TAG .'
             }
         }
 
-        stages('Docker login & push ') {
+        stage('Docker login & push ') {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'dockerhub-creds',
