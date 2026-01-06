@@ -3,20 +3,24 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = "shankarrao/myapp"
-        TAG = "${BUILD_NUMBER}"
+        TAG = "v1"
     }
 
     stages {
         
         stage('checkout SCM') {
             steps{
-                git 'https://github.com/shankarduppala/first_demo.git'
+                git branch: 'main',
+                    url: 'https://github.com/shankarduppala/first_demo.git',
+                    credentialsId: 'Git-Creds'
             }
         }
 
         stage('Build image') {
             steps{
-                sh 'docker build -t $DOCKER-IMAGE:$TAG .'
+                bat '''
+                docker build -t %DOCKER_IMAGE%:%TAG% .
+                '''
             }
         }
 
@@ -27,9 +31,9 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
-                    sh '''
-                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                    docker push $DOCKER_IMAGE:$TAG
+                    bat '''
+                    docker login -u %DOCKER_USER% -p %DOCKER_PASS%
+                    docker push %DOCKER_IMAGE%:%TAG%
                     '''
                 }
             }
@@ -37,7 +41,7 @@ pipeline {
     }
     post {
         always {
-            sh 'docker logout'
+            bat 'docker logout'
         }
     }
 }
